@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+    xmlns:task="http://www.springframework.org/schema/task"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+                            http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd
+                            http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task-4.0.xsd">
+    
+   <context:component-scan base-package="com.seedcloud" />
+   <task:scheduler id="taskScheduler" pool-size="4"/>   
+    <task:annotation-driven scheduler="taskScheduler"/>    
+
+    <bean id="twitterConfig" class="twitter4j.conf.ConfigurationBase"/>
+
+    <bean id="twitterConfigInjector" class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+     <property name="targetObject" ref="twitterConfig"/>
+     <property name="targetMethod"><value>setApplicationOnlyAuthEnabled</value></property>
+     <property name="arguments">
+        <value>true</value>
+     </property>
+    </bean>
+    
+
+    <bean id="twitterFactory" class="twitter4j.TwitterFactory">
+       <constructor-arg index="0" ref="twitterConfig"></constructor-arg>
+    </bean>
+
+    <bean id="twitter" name="twitter" factory-bean="twitterFactory" factory-method="getInstance"/>
+           
+    <bean id="twitterInjector" class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+     <property name="targetObject" ref="twitter"/>
+     <property name="targetMethod"><value>setOAuthConsumer</value></property>
+     <property name="arguments">
+          <list>
+             <value>EIjMMvN6HDkfWq5NrIlxYOPEp</value>
+             <value>iscl2gicvfU9z08GmaQW6CEt1JDes0TWLRAYQQm7TTjOJMXdeG</value>
+          </list>
+     </property>
+    </bean>
+  
+   <bean id="twitterDataService" class="com.seedcloud.service.TwitterDataService" init-method="prepareQuery"/> 
+  
+   <bean id="searchResultDao" class="com.seedcloud.dao.TweetDaoImpl"/>
+   
+   <bean id="TweetConverter" class="com.seedcloud.converter.TweetConverter"/>
+   
+   <bean id="solrServer" class="org.apache.solr.client.solrj.impl.HttpSolrServer">
+     <constructor-arg index="0" value="http://localhost:8983/solr"/>
+   </bean>
+   
+   <bean id="solrTemplate" class="org.springframework.data.solr.core.SolrTemplate">
+    <constructor-arg index="0" ref="solrServer"/>
+    <constructor-arg index="1" value="tweets"/>
+   </bean>
+
+</beans>

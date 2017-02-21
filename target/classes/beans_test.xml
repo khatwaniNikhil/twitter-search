@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+    xmlns:task="http://www.springframework.org/schema/task"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+                            http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd
+                            http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task-4.0.xsd">
+    
+   <context:component-scan base-package="com.seedcloud" />
+   
+   <bean id="twitterSearch" class="com.seedcloud.service.TwitterDataService">
+       <constructor-arg index="0" value="text1"/>
+      <constructor-arg index="1" ref="searchResultDao"/>
+   </bean>
+   
+   <bean id="searchResultDao" class="com.seedcloud.dao.TweetDaoImpl"/>
+   
+   <bean id="TweetConverter" class="com.seedcloud.converter.TweetConverter"/>
+   
+   <bean id="solrServer" class="org.apache.solr.client.solrj.impl.HttpSolrServer">
+     <constructor-arg index="0" value="http://localhost:8983/solr"/>
+   </bean>
+   
+   <bean id="solrTemplate" class="org.springframework.data.solr.core.SolrTemplate">
+    <constructor-arg index="0" ref="solrServer"/>
+    <constructor-arg index="1" value="tweets"/>
+   </bean>
+
+</beans>

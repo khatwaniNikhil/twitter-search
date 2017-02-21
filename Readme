@@ -1,0 +1,36 @@
+Challenge
+
+    Create a module of java code that searches the twitter API for a term at regular intervals (ie every hour) and stores the results.
+
+    The results should be queryable, in English, and filtered according to whether the query term appears embedded in a word, in a hashtag, within the tweet text, in the username.
+
+    The storage layer does not need to be implemented, it can be mocked.
+
+    Demonstrate OO design, use any libraries you wish.
+
+    The task should take around 2 hours. 
+
+Approach
+
+1) Tweet Data Fetch Flow
+    com.seedcloud.service.TwitterDataService
+    a) Fetch hourly data via ApplicationOnlyAuth(instead of access token auth): 450 request/sec, 45,000 tweets/15-min
+    b) Fetching data with lang=en
+
+2) Convert Tweet and store flow
+    a) Convert Tweet using com.seedcloud.converter.TweetConverter.java
+    b) Store Data in solr, com.seedcloud.dao.TweetDaoImpl.java
+ 
+3) Search and Filter Flow
+    com.seedcloud.service.SearchService.java  
+    a) default search is applied over "text" field type. Field's over which search to be performed
+       are copied to "text" field during ingestion via solr copy field config.
+       
+    b) Filtering of search results over column with which search term is matched is achieved via 
+       doing FacetQuery's with 'q' search query. There is one facet query for each column which is filterable.
+
+4) Filter/Search Flow Test
+    com.seedcloud.dao.SearchServiceTest.java
+
+5) Dependency: solr is running on localhost with tweets core configured.
+    TODO: embedded solr start/stop from SearchServiceTest
